@@ -1,0 +1,1253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>HACKII PANEL · PREDICTION ENGINE</title>
+    <style>
+        /* RESET & LIQUID GLASS DESIGN SYSTEM */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        :root {
+            /* THEME: LIQUID PURPLE & ICE BLUE (DEFAULT) */
+            --primary: #6366f1;
+            --primary-rgb: 99, 102, 241;
+            --secondary: #0ea5e9;
+            --secondary-rgb: 14, 165, 233;
+            --accent: #8b5cf6;
+            
+            --bg-base: #f1f5f9;
+            --bg-gradient: radial-gradient(circle at 10% 20%, #eef2ff 0%, #f8fafc 50%, #f1f5f9 100%);
+            
+            --glass-card: rgba(255, 255, 255, 0.65);
+            --glass-card-border: rgba(255, 255, 255, 0.85);
+            --glass-card-subtle: rgba(255, 255, 255, 0.45);
+            --glass-shadow: 0 16px 36px -10px rgba(99, 102, 241, 0.12), 0 0 1px 1px rgba(255, 255, 255, 0.9) inset;
+            
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --text-light: #94a3b8;
+            
+            --nav-glass: rgba(255, 255, 255, 0.8);
+            --nav-border: rgba(255, 255, 255, 0.95);
+            
+            --success: #10b981;
+            --success-bg: rgba(16, 185, 129, 0.12);
+            --danger: #f43f5e;
+            --danger-bg: rgba(244, 63, 94, 0.12);
+            --gold: #f59e0b;
+            --gold-bg: rgba(245, 158, 11, 0.12);
+        }
+
+        body.theme-crimson {
+            --primary: #f43f5e;
+            --primary-rgb: 244, 63, 94;
+            --secondary: #fb923c;
+            --secondary-rgb: 251, 146, 60;
+            --accent: #e11d48;
+            --glass-shadow: 0 16px 36px -10px rgba(244, 63, 94, 0.14), 0 0 1px 1px rgba(255, 255, 255, 0.9) inset;
+        }
+
+        body.theme-emerald {
+            --primary: #059669;
+            --primary-rgb: 5, 150, 105;
+            --secondary: #06b6d4;
+            --secondary-rgb: 6, 182, 212;
+            --accent: #10b981;
+            --glass-shadow: 0 16px 36px -10px rgba(5, 150, 105, 0.14), 0 0 1px 1px rgba(255, 255, 255, 0.9) inset;
+        }
+
+        body.theme-gold {
+            --primary: #d97706;
+            --primary-rgb: 217, 119, 6;
+            --secondary: #f59e0b;
+            --secondary-rgb: 245, 158, 11;
+            --accent: #b45309;
+            --glass-shadow: 0 16px 36px -10px rgba(217, 119, 6, 0.14), 0 0 1px 1px rgba(255, 255, 255, 0.9) inset;
+        }
+
+        body {
+            background: var(--bg-base);
+            background-image: var(--bg-gradient);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, Helvetica, Arial, sans-serif;
+            min-height: 100vh;
+            overflow-x: hidden;
+            user-select: none;
+            -webkit-font-smoothing: antialiased;
+            padding-bottom: 96px;
+            transition: background 0.4s ease;
+            position: relative;
+        }
+
+        /* LIQUID AMBIENT GLOW ORBS */
+        .liquid-orb {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            z-index: 0;
+            pointer-events: none;
+            opacity: 0.65;
+            transition: background 0.5s ease;
+        }
+        .orb-1 {
+            width: 340px;
+            height: 340px;
+            top: -70px;
+            left: -80px;
+            background: radial-gradient(circle, rgba(var(--primary-rgb), 0.35) 0%, rgba(255,255,255,0) 70%);
+            animation: orbFloat 14s ease-in-out infinite alternate;
+        }
+        .orb-2 {
+            width: 320px;
+            height: 320px;
+            bottom: 60px;
+            right: -80px;
+            background: radial-gradient(circle, rgba(var(--secondary-rgb), 0.3) 0%, rgba(255,255,255,0) 70%);
+            animation: orbFloat 16s ease-in-out infinite alternate-reverse;
+        }
+        @keyframes orbFloat {
+            0% { transform: translate(0, 0) scale(1); }
+            50% { transform: translate(30px, 40px) scale(1.08); }
+            100% { transform: translate(-20px, 20px) scale(0.95); }
+        }
+
+        /* LIQUID PARTICLES */
+        .bg-particles {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .particle {
+            position: absolute;
+            background: linear-gradient(135deg, rgba(var(--primary-rgb), 0.6), rgba(var(--secondary-rgb), 0.4));
+            border-radius: 50%;
+            pointer-events: none;
+            box-shadow: 0 4px 10px rgba(var(--primary-rgb), 0.15);
+            animation: particleFloat linear infinite;
+        }
+        @keyframes particleFloat {
+            0% { transform: translateY(105vh) scale(0.4); opacity: 0; }
+            20% { opacity: 0.6; }
+            80% { opacity: 0.6; }
+            100% { transform: translateY(-10vh) scale(1.1); opacity: 0; }
+        }
+
+        /* SPLASH SCREEN */
+        .splash-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            background: linear-gradient(145deg, #f8fafc, #edf2f7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            transition: opacity 0.6s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.6s ease;
+        }
+        .splash-screen.fade-out {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+        }
+        .splash-card {
+            background: rgba(255, 255, 255, 0.75);
+            border: 1px solid rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border-radius: 32px;
+            padding: 38px 28px;
+            width: 86%;
+            max-width: 360px;
+            text-align: center;
+            box-shadow: 0 20px 45px -12px rgba(99, 102, 241, 0.2), 0 0 1px 1px #fff inset;
+            animation: splashEntrance 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes splashEntrance {
+            from { opacity: 0; transform: translateY(20px) scale(0.96); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .splash-logo {
+            width: 76px;
+            height: 76px;
+            margin: 0 auto 18px;
+            border-radius: 24px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-size: 34px;
+            box-shadow: 0 12px 28px -6px rgba(var(--primary-rgb), 0.4);
+            animation: splashPulse 2s ease-in-out infinite alternate;
+        }
+        @keyframes splashPulse {
+            0% { transform: scale(1); box-shadow: 0 12px 28px -6px rgba(var(--primary-rgb), 0.4); }
+            100% { transform: scale(1.05); box-shadow: 0 16px 36px -4px rgba(var(--primary-rgb), 0.6); }
+        }
+        .splash-title {
+            font-size: 22px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            color: var(--text-main);
+            margin-bottom: 4px;
+        }
+        .splash-sub {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 2.5px;
+            color: var(--primary);
+            text-transform: uppercase;
+            margin-bottom: 24px;
+        }
+        .splash-progress-track {
+            width: 100%;
+            height: 6px;
+            background: rgba(148, 163, 184, 0.2);
+            border-radius: 99px;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+        .splash-progress-bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            border-radius: 99px;
+            transition: width 0.15s ease-out;
+        }
+        .splash-status-text {
+            font-size: 11px;
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        /* APP CONTAINER */
+        .app-container {
+            position: relative;
+            z-index: 5;
+            max-width: 460px;
+            margin: 0 auto;
+            padding: 14px 16px 0;
+        }
+
+        /* HEADER */
+        .app-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 4px 18px;
+        }
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .logo-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            color: #ffffff;
+            box-shadow: 0 8px 20px -4px rgba(var(--primary-rgb), 0.4), inset 0 1px 1px rgba(255,255,255,0.4);
+        }
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+        }
+        .logo-text .brand {
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: 1.5px;
+            color: var(--text-main);
+        }
+        .logo-text .sub {
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            color: var(--primary);
+            text-transform: uppercase;
+        }
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid var(--glass-card-border);
+            border-radius: 30px;
+            padding: 6px 14px;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        }
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--success);
+            box-shadow: 0 0 8px var(--success);
+            animation: dotGlow 1.8s infinite alternate;
+        }
+        @keyframes dotGlow {
+            0% { opacity: 0.6; transform: scale(0.9); }
+            100% { opacity: 1; transform: scale(1.15); }
+        }
+        .status-text {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        /* LIQUID GLASS DASHBOARD CARD */
+        .main-dashboard {
+            background: var(--glass-card);
+            border: 1px solid var(--glass-card-border);
+            border-radius: 28px;
+            padding: 22px 18px 20px;
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            box-shadow: var(--glass-shadow);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        .main-dashboard::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 50%;
+            background: linear-gradient(180deg, rgba(255,255,255,0.4) 0%, rgba(255,255,255,0) 100%);
+            border-radius: 28px 28px 0 0;
+            pointer-events: none;
+        }
+
+        /* PERIOD ROW */
+        .period-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .period-label {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+        .level-badge {
+            font-size: 9px;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.85);
+            border: 1px solid rgba(var(--primary-rgb), 0.3);
+            color: var(--primary);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            box-shadow: 0 2px 8px rgba(var(--primary-rgb), 0.08);
+        }
+        .period-value {
+            font-size: 16px;
+            font-weight: 800;
+            color: var(--text-main);
+            letter-spacing: 1px;
+            margin-bottom: 6px;
+        }
+
+        /* PREDICTION HERO */
+        .prediction-main {
+            text-align: center;
+            margin: 18px 0 12px;
+            padding: 16px 10px;
+            border-radius: 22px;
+            background: rgba(255, 255, 255, 0.45);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 8px 20px -8px rgba(0,0,0,0.04);
+        }
+        .prediction-label {
+            font-size: 10px;
+            letter-spacing: 3px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+        .prediction-value {
+            font-size: 48px;
+            font-weight: 900;
+            letter-spacing: 3px;
+            line-height: 1.15;
+            margin: 6px 0;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .prediction-numbers {
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-main);
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(var(--primary-rgb), 0.2);
+            border-radius: 30px;
+            padding: 6px 16px;
+            display: inline-block;
+            letter-spacing: 1.5px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+        }
+
+        /* STATS GRID */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 18px 0 10px;
+        }
+        .stat-card {
+            background: rgba(255, 255, 255, 0.65);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            border-radius: 18px;
+            padding: 14px 6px;
+            text-align: center;
+            box-shadow: 0 6px 16px -6px rgba(0,0,0,0.03);
+            transition: transform 0.2s ease;
+        }
+        .stat-card:active {
+            transform: scale(0.97);
+        }
+        .stat-value {
+            font-size: 20px;
+            font-weight: 800;
+            line-height: 1.2;
+            color: var(--text-main);
+        }
+        .stat-label {
+            font-size: 9px;
+            letter-spacing: 1px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: 700;
+            margin-top: 4px;
+        }
+
+        /* ACTIVITY LOGS */
+        .logs-section {
+            margin-top: 22px;
+        }
+        .section-title {
+            font-size: 11px;
+            letter-spacing: 2px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .section-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(148, 163, 184, 0.3), transparent);
+        }
+        .logs-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+        }
+        .logs-table th {
+            color: var(--text-muted);
+            font-weight: 700;
+            text-transform: uppercase;
+            font-size: 9px;
+            letter-spacing: 0.8px;
+            padding: 8px 6px;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+        }
+        .logs-table td {
+            padding: 10px 6px;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+            text-align: center;
+            font-weight: 600;
+        }
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 30px;
+            font-size: 9px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+        }
+        .badge-big {
+            background: rgba(14, 165, 233, 0.14);
+            color: #0284c7;
+            border: 1px solid rgba(14, 165, 233, 0.3);
+        }
+        .badge-small {
+            background: rgba(244, 63, 94, 0.14);
+            color: #e11d48;
+            border: 1px solid rgba(244, 63, 94, 0.3);
+        }
+        .win-text {
+            color: var(--success);
+            font-weight: 800;
+        }
+        .loss-text {
+            color: var(--danger);
+            font-weight: 800;
+        }
+
+        /* BUTTONS */
+        .btn-primary {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            padding: 15px 18px;
+            margin-top: 18px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            border: none;
+            border-radius: 18px;
+            color: #ffffff;
+            font-weight: 800;
+            font-size: 12px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            text-decoration: none;
+            box-shadow: 0 8px 24px -4px rgba(var(--primary-rgb), 0.35);
+            transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s;
+            cursor: pointer;
+        }
+        .btn-primary:active {
+            transform: scale(0.97);
+            box-shadow: 0 4px 12px -2px rgba(var(--primary-rgb), 0.3);
+        }
+        .btn-icon {
+            font-size: 16px;
+        }
+
+        /* BOTTOM NAVIGATION BAR */
+        .bottom-nav {
+            position: fixed;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: calc(100% - 32px);
+            max-width: 440px;
+            background: var(--nav-glass);
+            border: 1px solid var(--nav-border);
+            border-radius: 32px;
+            padding: 8px 10px;
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            box-shadow: 0 16px 36px -10px rgba(0,0,0,0.08), 0 0 1px 1px #fff inset;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            z-index: 100;
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            padding: 8px 12px;
+            border-radius: 22px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            position: relative;
+            flex: 1;
+            max-width: 80px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+        }
+        .nav-item.active {
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+        }
+        .nav-item.active .nav-icon {
+            color: var(--primary);
+            transform: scale(1.1);
+        }
+        .nav-item.active .nav-label {
+            color: var(--primary);
+            font-weight: 800;
+        }
+        .nav-icon {
+            font-size: 18px;
+            transition: transform 0.2s;
+            line-height: 1;
+        }
+        .nav-label {
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            transition: color 0.2s;
+        }
+
+        /* TOAST NOTIFICATION */
+        .toast {
+            position: fixed;
+            bottom: 96px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: rgba(255, 255, 255, 0.92);
+            border: 1px solid rgba(255, 255, 255, 0.95);
+            border-radius: 30px;
+            padding: 10px 22px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            color: var(--primary);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            box-shadow: 0 10px 30px -5px rgba(0,0,0,0.1);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: none;
+            z-index: 200;
+            white-space: nowrap;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* TABS */
+        .tab-section {
+            display: none;
+            animation: tabFadeIn 0.35s ease;
+        }
+        .tab-section.active {
+            display: block;
+        }
+        @keyframes tabFadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* THEME SWATCHES */
+        .theme-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-top: 14px;
+        }
+        .theme-swatch {
+            aspect-ratio: 1;
+            border-radius: 50%;
+            border: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        .theme-swatch.active {
+            border-color: #ffffff;
+            transform: scale(1.1);
+            box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+        }
+        .swatch-violet { background: linear-gradient(135deg, #6366f1, #0ea5e9); }
+        .swatch-crimson { background: linear-gradient(135deg, #f43f5e, #fb923c); }
+        .swatch-emerald { background: linear-gradient(135deg, #059669, #06b6d4); }
+        .swatch-gold { background: linear-gradient(135deg, #d97706, #f59e0b); }
+
+        /* UTILITY */
+        .mt-1 { margin-top: 8px; }
+        .mt-2 { margin-top: 16px; }
+
+        /* ACCESS GATE - added without changing the existing panel styles */
+        #authGate{position:fixed;inset:0;z-index:10000;display:flex;align-items:center;justify-content:center;padding:22px;background:linear-gradient(145deg,#f8fafc,#e9edff);}
+        #authGate .auth-card{width:100%;max-width:360px;padding:30px 24px;border-radius:28px;background:rgba(255,255,255,.88);border:1px solid #fff;box-shadow:0 20px 55px rgba(60,70,140,.18);text-align:center;backdrop-filter:blur(22px);}
+        #authGate .auth-logo{font-size:38px;margin-bottom:12px;}
+        #authGate h2{font-size:21px;font-weight:900;letter-spacing:1.5px;color:#1e293b;margin-bottom:7px;}
+        #authGate p{font-size:11px;color:#64748b;margin-bottom:20px;letter-spacing:.7px;}
+        #memberKey{width:100%;padding:15px 14px;border-radius:14px;border:1px solid #cbd5e1;background:#fff;color:#1e293b;font-size:15px;outline:none;text-align:center;letter-spacing:1px;}
+        #memberKey:focus{border-color:#6366f1;box-shadow:0 0 0 3px rgba(99,102,241,.12);}
+        #authStart{width:100%;margin-top:13px;padding:15px;border:0;border-radius:14px;background:linear-gradient(135deg,#6366f1,#0ea5e9);color:#fff;font-weight:900;letter-spacing:1px;font-size:13px;}
+        #authError{min-height:18px;margin-top:11px;color:#e11d48;font-size:11px;font-weight:700;}
+        #adminLink{display:inline-block;margin-top:12px;color:#64748b;font-size:11px;text-decoration:none;}
+
+    </style>
+</head>
+<body class="theme-violet" oncontextmenu="return false;">
+    <div id="authGate" style="display:flex">
+      <form class="auth-card" id="memberLoginForm">
+        <div class="auth-logo">🔐</div>
+        <h2>HACKII PANEL</h2>
+        <p>ENTER YOUR ACCESS KEY TO CONTINUE</p>
+        <input id="memberKey" type="password" autocomplete="off" placeholder="Enter Access Key" required>
+        <button id="authStart" type="submit">START</button>
+        <div id="authError"></div>
+        <a id="adminLink" href="/admin">ADMIN LOGIN</a>
+      </form>
+    </div>
+
+
+    <!-- ============ LIQUID GLASS SPLASH SCREEN ============ -->
+    <div class="splash-screen" id="splashScreen">
+        <div class="splash-card">
+            <div class="splash-logo">👑</div>
+            <div class="splash-title">HACKII PANEL</div>
+            <div class="splash-sub">PREDICTION ENGINE</div>
+
+            <div class="splash-progress-track">
+                <div class="splash-progress-bar" id="splashBar"></div>
+            </div>
+
+            <div class="splash-status-text" id="splashText">Connecting to neural feed...</div>
+        </div>
+    </div>
+
+    <!-- AMBIENT LIQUID ORBS -->
+    <div class="liquid-orb orb-1"></div>
+    <div class="liquid-orb orb-2"></div>
+
+    <!-- DYNAMIC BACKGROUND PARTICLES -->
+    <div class="bg-particles" id="bgParticles"></div>
+
+    <!-- APP CONTAINER -->
+    <div class="app-container">
+
+        <!-- HEADER -->
+        <header class="app-header">
+            <div class="logo-area">
+                <div class="logo-icon">👑</div>
+                <div class="logo-text">
+                    <span class="brand">HACKII PANEL</span>
+                    <span class="sub">V5 PREMIUM</span>
+                </div>
+            </div>
+            <div class="status-indicator">
+                <span class="status-dot"></span>
+                <span class="status-text">LIVE</span>
+            </div>
+        </header>
+
+        <!-- TAB: COMMAND (DASHBOARD) -->
+        <section id="tab-command" class="tab-section active">
+            <div class="main-dashboard">
+                <div class="period-row">
+                    <span class="period-label">NEXT PERIOD</span>
+                    <span class="level-badge" id="levelInfo">LEVEL 1</span>
+                </div>
+                <div class="period-value" id="pID">CALCULATING...</div>
+
+                <div class="prediction-main">
+                    <div class="prediction-label">PREDICTION</div>
+                    <div class="prediction-value" id="pRes">WAITING</div>
+                    <div class="prediction-numbers" id="pOpps">ANALYZING TRENDS...</div>
+                </div>
+
+                <!-- STATS -->
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalWins" style="color: var(--success);">0</div>
+                        <div class="stat-label">WINS</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="totalLosses" style="color: var(--danger);">0</div>
+                        <div class="stat-label">LOSSES</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="winRate" style="color: var(--gold);">100%</div>
+                        <div class="stat-label">ACCURACY</div>
+                    </div>
+                </div>
+
+                <!-- LOGS -->
+                <div class="logs-section">
+                    <div class="section-title">RECENT ACTIVITY</div>
+                    <table class="logs-table">
+                        <thead>
+                            <tr>
+                                <th>PERIOD</th>
+                                <th>PRED</th>
+                                <th>RESULT</th>
+                                <th>STATUS</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logs"></tbody>
+                    </table>
+                </div>
+
+                <!-- CTA BUTTON -->
+                <a href="https://t.me/m/JLgSKM-9YjZl" target="_blank" class="btn-primary" id="ctaBtn">
+                    <span class="btn-icon">💬</span> OFFICIAL TELEGRAM CHANNEL
+                </a>
+            </div>
+        </section>
+
+        <!-- TAB: ANALYSIS (STATS DETAIL) -->
+        <section id="tab-analysis" class="tab-section">
+            <div class="main-dashboard">
+                <div class="section-title">DEEP ANALYSIS</div>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px;">
+                    <div class="stat-card">
+                        <div class="stat-value" id="analysisWins">0</div>
+                        <div class="stat-label">TOTAL WINS</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="analysisLosses">0</div>
+                        <div class="stat-label">TOTAL LOSSES</div>
+                    </div>
+                </div>
+                <div class="stat-card" style="margin-top: 10px;">
+                    <div class="stat-value" id="analysisRate">100%</div>
+                    <div class="stat-label">WIN RATE (LIVE)</div>
+                </div>
+                <div class="stat-card" style="margin-top: 10px;">
+                    <div class="stat-value" id="analysisBacktest">0</div>
+                    <div class="stat-label">BACKTEST SAMPLES</div>
+                </div>
+                <div class="section-title mt-2">SYSTEM STATUS</div>
+                <div style="font-size: 12px; color: var(--text-muted); line-height: 1.8; background: rgba(255,255,255,0.5); border-radius: 16px; padding: 14px; border: 1px solid rgba(255,255,255,0.8);">
+                    <div>⚡ ENGINE: <span style="color: var(--success); font-weight: 700;">ACTIVE</span></div>
+                    <div>📡 DATA FEED: <span style="color: var(--success); font-weight: 700;">CONNECTED</span></div>
+                    <div>🛡️ RISK GUARD: <span id="riskGuardStatus" style="color: var(--success); font-weight: 700;">ARMED</span></div>
+                    <div>📊 LEVEL: <span id="analysisLevel" style="font-weight: 700;">1 (PRIMARY)</span></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB: TOOLS (THEME SWITCHER) -->
+        <section id="tab-tools" class="tab-section">
+            <div class="main-dashboard">
+                <div class="section-title">APPEARANCE</div>
+                <div style="font-size: 11px; color: var(--text-muted); margin-bottom: 10px; font-weight: 600;">SELECT THEME</div>
+                <div class="theme-grid">
+                    <div class="theme-swatch swatch-violet active" data-theme="theme-violet" title="Liquid Purple"></div>
+                    <div class="theme-swatch swatch-crimson" data-theme="theme-crimson" title="Crimson Glow"></div>
+                    <div class="theme-swatch swatch-emerald" data-theme="theme-emerald" title="Emerald Ice"></div>
+                    <div class="theme-swatch swatch-gold" data-theme="theme-gold" title="Royal Amber"></div>
+                </div>
+
+                <div class="section-title mt-2">QUICK ACTIONS</div>
+                <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                    <button class="btn-primary" style="flex: 1; min-width: 120px; padding: 12px; font-size: 11px;" id="refreshBtn">
+                        <span class="btn-icon">🔄</span> REFRESH
+                    </button>
+                    <button class="btn-primary" style="flex: 1; min-width: 120px; padding: 12px; font-size: 11px;" id="copyPeriodBtn">
+                        <span class="btn-icon">📋</span> COPY PERIOD
+                    </button>
+                </div>
+
+                <div class="section-title mt-2">SYSTEM INFO</div>
+                <div style="font-size: 11px; color: var(--text-muted); line-height: 1.8; background: rgba(255,255,255,0.5); border-radius: 16px; padding: 14px; border: 1px solid rgba(255,255,255,0.8);">
+                    <div>MOD: HACKII PANEL V5</div>
+                    <div>ENGINE: RAW DATA BACKTEST</div>
+                    <div>MODE: 2-LEVEL FIX</div>
+                    <div>DESIGN: LIQUID GLASS UI</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB: ACTIVITY (FULL LOGS) -->
+        <section id="tab-activity" class="tab-section">
+            <div class="main-dashboard">
+                <div class="section-title">FULL ACTIVITY LOG</div>
+                <table class="logs-table" id="fullLogsTable">
+                    <thead>
+                        <tr>
+                            <th>PERIOD</th>
+                            <th>PRED</th>
+                            <th>RESULT</th>
+                            <th>STATUS</th>
+                        </tr>
+                    </thead>
+                    <tbody id="fullLogsBody">
+                        <!-- Filled by JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- FLOATING LIQUID NAVIGATION -->
+    <nav class="bottom-nav">
+        <button class="nav-item active" data-tab="tab-command">
+            <span class="nav-icon">⌘</span>
+            <span class="nav-label">COMMAND</span>
+        </button>
+        <button class="nav-item" data-tab="tab-analysis">
+            <span class="nav-icon">📊</span>
+            <span class="nav-label">ANALYSIS</span>
+        </button>
+        <button class="nav-item" data-tab="tab-tools">
+            <span class="nav-icon">⚙️</span>
+            <span class="nav-label">TOOLS</span>
+        </button>
+        <button class="nav-item" data-tab="tab-activity">
+            <span class="nav-icon">📋</span>
+            <span class="nav-label">ACTIVITY</span>
+        </button>
+    </nav>
+
+    <!-- TOAST -->
+    <div class="toast" id="toast"></div>
+
+
+    <script>
+    (function(){
+      const form=document.getElementById('memberLoginForm');
+      form.addEventListener('submit',async function(e){
+        e.preventDefault();
+        const btn=document.getElementById('authStart'), error=document.getElementById('authError');
+        btn.disabled=true; btn.textContent='VERIFYING...'; error.textContent='';
+        try{
+          const response=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},credentials:'same-origin',body:JSON.stringify({key:document.getElementById('memberKey').value})});
+          const data=await response.json();
+          if(!response.ok) throw new Error(data.error||'Invalid key');
+          location.reload();
+        }catch(err){error.textContent=err.message||'Login failed';btn.disabled=false;btn.textContent='START';}
+      });
+    })();
+    </script>
+    <script>
+        (function() {
+            "use strict";
+
+            // ----- CORE STATE (PRESERVED) -----
+            let currentPrediction = null;
+            let currentNumbers = [];
+            let currentLevel = 1;
+            let winsCount = 0;
+            let lossCount = 0;
+            let circuitBreaker = false;
+            let backtestWins = 0;
+            let backtestLosses = 0;
+            let lastProcessedPeriod = null;
+            let fullLogs = [];
+
+            // ----- ENGINE CONTROL -----
+            let engineStarted = false;
+            let fetchInterval = null;
+
+            // ----- DOM REFS -----
+            const pID = document.getElementById('pID');
+            const pRes = document.getElementById('pRes');
+            const pOpps = document.getElementById('pOpps');
+            const levelInfo = document.getElementById('levelInfo');
+            const totalWins = document.getElementById('totalWins');
+            const totalLosses = document.getElementById('totalLosses');
+            const winRate = document.getElementById('winRate');
+            const logsBody = document.getElementById('logs');
+            const fullLogsBody = document.getElementById('fullLogsBody');
+            const toast = document.getElementById('toast');
+
+            // Analysis refs
+            const analysisWins = document.getElementById('analysisWins');
+            const analysisLosses = document.getElementById('analysisLosses');
+            const analysisRate = document.getElementById('analysisRate');
+            const analysisBacktest = document.getElementById('analysisBacktest');
+            const riskGuardStatus = document.getElementById('riskGuardStatus');
+            const analysisLevel = document.getElementById('analysisLevel');
+
+            // Splash refs
+            const splashScreen = document.getElementById('splashScreen');
+            const splashBar = document.getElementById('splashBar');
+            const splashText = document.getElementById('splashText');
+
+            // ----- UTILITY FUNCTIONS -----
+            function showToast(msg) {
+                toast.textContent = msg;
+                toast.classList.add('show');
+                clearTimeout(window.toastTimer);
+                window.toastTimer = setTimeout(() => toast.classList.remove('show'), 2200);
+            }
+
+            function updateUIStats() {
+                const displayWins = winsCount + backtestWins;
+                const displayLosses = lossCount + backtestLosses;
+                totalWins.innerText = displayWins;
+                totalLosses.innerText = displayLosses;
+                const total = winsCount + lossCount;
+                const rate = total > 0 ? Math.round((winsCount / total) * 100) : 100;
+                winRate.innerText = rate + "%";
+
+                analysisWins.innerText = displayWins;
+                analysisLosses.innerText = displayLosses;
+                analysisRate.innerText = rate + "%";
+                analysisBacktest.innerText = (backtestWins + backtestLosses);
+                riskGuardStatus.innerText = circuitBreaker ? "ACTIVE" : "ARMED";
+                riskGuardStatus.style.color = circuitBreaker ? "var(--danger)" : "var(--success)";
+                analysisLevel.innerText = circuitBreaker ? "STOPPED" : (currentLevel === 1 ? "1 (PRIMARY)" : "2 (BOOST)");
+            }
+
+            // ----- CORE PREDICTION LOGIC (PRESERVED) -----
+            function calculateBasePrediction(history) {
+                if (!history || history.length < 5) return null;
+
+                let bigs = 0;
+                let smalls = 0;
+
+                for (let i = 0; i < Math.min(10, history.length); i++) {
+                    const num = parseInt(history[i].number);
+                    const weight = (10 - i);
+                    if (num >= 5) bigs += weight;
+                    else smalls += weight;
+                }
+
+                const last3 = history.slice(0, 3).map(x => parseInt(x.number) >= 5 ? "BIG" : "SMALL");
+                if (last3[0] === last3[1] && last3[1] === last3[2]) {
+                    return last3[0] === "BIG" ? "SMALL" : "BIG";
+                }
+
+                return bigs >= smalls ? "BIG" : "SMALL";
+            }
+
+            function generateNumbers(prediction, history) {
+                if (!prediction || !history || !history.length) return [];
+                const counts = {};
+                history.forEach(x => {
+                    const n = parseInt(x.number);
+                    if (n >= 0 && n <= 9 && (n >= 5 ? "BIG" : "SMALL") === prediction) counts[n] = (counts[n] || 0) + 1;
+                });
+                return Object.entries(counts)
+                    .sort((a, b) => b[1] - a[1])
+                    .slice(0, 2)
+                    .map(x => Number(x[0]))
+                    .sort((a, b) => a - b);
+            }
+
+            function runRollingBacktest(history) {
+                let wins = 0, losses = 0;
+                const chronological = [...history].reverse();
+                for (let i = 12; i < chronological.length; i++) {
+                    const prediction = calculateBasePrediction(chronological.slice(0, i).reverse());
+                    if (!prediction) continue;
+                    const actual = parseInt(chronological[i].number) >= 5 ? "BIG" : "SMALL";
+                    prediction === actual ? wins++ : losses++;
+                }
+                backtestWins = wins;
+                backtestLosses = losses;
+            }
+
+            // ----- FETCH & UPDATE ENGINE -----
+            async function fetchData() {
+                if (!engineStarted) return;
+
+                try {
+                    const res = await fetch('https://draw.ar-lottery01.com/WinGo/WinGo_1M/GetHistoryIssuePage.json');
+                    const json = await res.json();
+
+                    if (!json || !json.data || !json.data.list) return;
+
+                    const list = json.data.list;
+                    runRollingBacktest(list);
+                    updateUIStats();
+
+                    const latest = list[0];
+                    const currentPeriod = (BigInt(latest.issueNumber) + 1n).toString();
+
+                    if (lastProcessedPeriod !== latest.issueNumber) {
+
+                        if (lastProcessedPeriod && currentPrediction) {
+                            const actualNum = parseInt(latest.number);
+                            const actualSize = actualNum >= 5 ? "BIG" : "SMALL";
+                            const isWin = (currentPrediction === actualSize) || currentNumbers.includes(actualNum);
+
+                            if (isWin) {
+                                winsCount++;
+                                currentLevel = 1;
+                                circuitBreaker = false;
+                            } else {
+                                lossCount++;
+                                circuitBreaker = true;
+                                currentLevel = 1;
+                            }
+
+                            updateUIStats();
+
+                            const rowHTML = `<tr>
+                                <td>${latest.issueNumber.slice(-4)}</td>
+                                <td><span class="badge ${currentPrediction==='BIG'?'badge-big':'badge-small'}">${currentPrediction}</span></td>
+                                <td><b style="color:var(--text-main);">${actualNum}</b> (${actualSize})</td>
+                                <td class="${isWin?'win-text':'loss-text'}">${isWin ? 'WIN 🌟' : 'LOSS ❤️‍🩹'}</td>
+                            </tr>`;
+
+                            logsBody.innerHTML = rowHTML + logsBody.innerHTML;
+                            fullLogs.unshift(rowHTML);
+                            if (fullLogs.length > 30) fullLogs.pop();
+                            fullLogsBody.innerHTML = fullLogs.join('');
+
+                            if (logsBody.children.length > 8) {
+                                logsBody.removeChild(logsBody.lastChild);
+                            }
+                        }
+
+                        let basePred = calculateBasePrediction(list);
+                        currentPrediction = circuitBreaker ? null : basePred;
+                        currentNumbers = generateNumbers(currentPrediction, list);
+                        lastProcessedPeriod = latest.issueNumber;
+                    }
+
+                    pID.innerText = currentPeriod;
+                    pRes.innerText = circuitBreaker ? "STOPPED" : (currentPrediction || "ANALYZING...");
+                    pOpps.innerText = circuitBreaker
+                        ? "RISK GUARD ACTIVE"
+                        : (currentNumbers.length ? "NUMBERS: " + currentNumbers.join(" | ") : "ANALYZING...");
+
+                    if (circuitBreaker) {
+                        levelInfo.innerText = "RISK GUARD";
+                        levelInfo.style.borderColor = "var(--danger)";
+                        levelInfo.style.color = "var(--danger)";
+                    } else if (currentLevel === 1) {
+                        levelInfo.innerText = "LEVEL 1";
+                        levelInfo.style.borderColor = "rgba(var(--primary-rgb), 0.3)";
+                        levelInfo.style.color = "var(--primary)";
+                    } else {
+                        levelInfo.innerText = "LEVEL 2";
+                        levelInfo.style.borderColor = "rgba(var(--secondary-rgb), 0.3)";
+                        levelInfo.style.color = "var(--secondary)";
+                    }
+
+                    updateUIStats();
+
+                } catch (e) {
+                    console.log("Fetch connection waiting...", e);
+                }
+            }
+
+            // ----- ENGINE START -----
+            function startEngine() {
+                if (engineStarted) return;
+                engineStarted = true;
+                fetchData();
+                fetchInterval = setInterval(fetchData, 3000);
+            }
+
+            // ----- SMOOTH SPLASH FLOW -----
+            function launchSplashScreen() {
+                let progress = 0;
+                const stages = [
+                    { at: 25, text: "Initializing Liquid UI Engine..." },
+                    { at: 55, text: "Connecting to Raw Live Data Feeds..." },
+                    { at: 85, text: "Applying Trend Backtest Matrix..." },
+                    { at: 100, text: "Engine Ready. Welcome to HACKII PANEL!" }
+                ];
+
+                const interval = setInterval(() => {
+                    progress += Math.floor(Math.random() * 8) + 4;
+                    if (progress > 100) progress = 100;
+                    
+                    splashBar.style.width = progress + '%';
+
+                    for (let s of stages) {
+                        if (progress >= s.at) {
+                            splashText.innerText = s.text;
+                        }
+                    }
+
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        setTimeout(() => {
+                            splashScreen.classList.add('fade-out');
+                            startEngine();
+                            showToast("✨ HACKII PANEL ENGINE ONLINE");
+                        }, 400);
+                    }
+                }, 75);
+            }
+
+            // ----- INIT -----
+            async function init() {
+                // Access is verified by the server before the existing panel starts.
+                const gate = document.getElementById('authGate');
+                try {
+                    const authResponse = await fetch('/api/me', { credentials: 'same-origin' });
+                    if (!authResponse.ok) { gate.style.display = 'flex'; return; }
+                    gate.style.display = 'none';
+                    const heartbeat = () => fetch('/api/heartbeat', { method: 'POST', credentials: 'same-origin' }).catch(() => {});
+                    heartbeat();
+                    window.__hackiiHeartbeat = setInterval(heartbeat, 15000);
+                    document.addEventListener('visibilitychange', () => { if (!document.hidden) heartbeat(); });
+                    window.addEventListener('pagehide', () => { try { navigator.sendBeacon('/api/heartbeat'); } catch (_) {} });
+                } catch (_) { gate.style.display = 'flex'; return; }
+
+                // Generate Lightweight Floating Particles
+                const particleContainer = document.getElementById('bgParticles');
+                for (let i = 0; i < 20; i++) {
+                    const p = document.createElement('div');
+                    p.className = 'particle';
+                    const size = Math.random() * 5 + 3;
+                    p.style.width = size + 'px';
+                    p.style.height = size + 'px';
+                    p.style.left = Math.random() * 100 + '%';
+                    p.style.animationDuration = (Math.random() * 16 + 12) + 's';
+                    p.style.animationDelay = (Math.random() * -15) + 's';
+                    p.style.opacity = Math.random() * 0.4 + 0.15;
+                    particleContainer.appendChild(p);
+                }
+
+                // Tab Navigation
+                document.querySelectorAll('.nav-item').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+                        this.classList.add('active');
+                        const tabId = this.dataset.tab;
+                        document.querySelectorAll('.tab-section').forEach(s => s.classList.remove('active'));
+                        document.getElementById(tabId).classList.add('active');
+                    });
+                });
+
+                // Theme Switcher
+                document.querySelectorAll('.theme-swatch').forEach(sw => {
+                    sw.addEventListener('click', function() {
+                        document.querySelectorAll('.theme-swatch').forEach(s => s.classList.remove('active'));
+                        this.classList.add('active');
+                        const theme = this.dataset.theme;
+                        document.body.className = theme;
+                        showToast('THEME: ' + this.title.toUpperCase());
+                    });
+                });
+
+                // Refresh Button
+                document.getElementById('refreshBtn').addEventListener('click', function() {
+                    showToast('REFRESHING DATA...');
+                    fetchData();
+                });
+
+                // Copy Period Button
+                document.getElementById('copyPeriodBtn').addEventListener('click', function() {
+                    const period = pID.innerText;
+                    if (period && period !== 'CALCULATING...') {
+                        navigator.clipboard.writeText(period).then(() => {
+                            showToast('PERIOD COPIED: ' + period);
+                        }).catch(() => {
+                            showToast('COPY FAILED');
+                        });
+                    } else {
+                        showToast('NO PERIOD DATA');
+                    }
+                });
+
+                // Initial UI Stats
+                updateUIStats();
+
+                // Launch Automatic Splash Screen
+                launchSplashScreen();
+            }
+
+            window.addEventListener('load', init);
+        })();
+    </script>
+</body>
+</html>
